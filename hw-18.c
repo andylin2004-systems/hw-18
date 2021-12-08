@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
-// #include 
+#include <string.h>
 
 int main()
 {
@@ -13,6 +13,7 @@ int main()
     while (1)
     {
         char in[1024] = {0};
+        printf("Enter something for the child to destroy:\n");
         read(STDIN_FILENO, in, sizeof(char) * 1024);
         write(pipes[1], in, sizeof(in));
 
@@ -20,10 +21,9 @@ int main()
         if ((forkPid = fork()))
         {
             char processedLine[1024] = {0};
-            waitpid(forkPid, &status, 0);
+            wait(&status);
             read(pipes[2], processedLine, sizeof(processedLine));
-            printf("%s\n", processedLine);
-            
+            printf("Response: %s\n", processedLine);
         }
         else
         {
@@ -33,7 +33,8 @@ int main()
             for (i = 0; i < 1024; i++){
                 in[i] += 1;
             }
-            write(pipes[3], in, sizeof(in));
+            write(pipes[3], in, sizeof(char) * strlen(in));
+            return 0;
         }
     }
 }
